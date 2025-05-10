@@ -9,6 +9,7 @@ using UnityEngine;
 namespace RhythmDoctor.EditorLaunch;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInProcess("Rhythm Doctor.exe")]
 public class Plugin : BaseUnityPlugin
 {
   internal static new ManualLogSource Logger;
