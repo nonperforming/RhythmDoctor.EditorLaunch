@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>non.rhythmdoctor.editorlaunch</AssemblyName>
+    <Product>RhythmDoctor.EditorLaunch</Product>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json;
+      https://nuget.samboy.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+    <RootNamespace>RhythmDoctor.EditorLaunch</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="Nitrox.Discovery.MSBuild" Version="0.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="UnityEngine.Modules" Version="2022.2.33" IncludeAssets="compile" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="FindGameAndIncludeReferences" BeforeTargets="ResolveAssemblyReferences" Condition="'$(_NitroxDiscovery_TaskAssembly)' != ''">
+    <PropertyGroup>
+      <GameName>Rhythm Doctor</GameName>
+    </PropertyGroup>
+    <DiscoverGame GameName="$(GameName)">
+      <Output TaskParameter="GamePath" PropertyName="GameDir" />
+    </DiscoverGame>
+
+    <Error Condition="'$(GameDir)' == ''" Text="Couldn't find Rhythm Doctor installed " />
+    
+    <PropertyGroup>
+      <GameDir>$(GameDir)\Rhythm Doctor_Data\Managed\</GameDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="Assembly-CSharp">
+        <HintPath>$(GameDir)\Assembly-CSharp.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+  </Target>
+</Project>
