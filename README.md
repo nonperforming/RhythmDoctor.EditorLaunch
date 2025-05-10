@@ -10,5 +10,9 @@ This is a BepInEx 5 plugin.
 > You may want to install [BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen) or [enable the console](https://docs.bepinex.dev/articles/user_guide/configuration.html#configuring-bepinex) to check if the game is running
 
 ## TODO
-- Try to improve startup times somehow?
+- Improve startup times
+  - Find if there is a way to influence load priority
+  - Prefixing the filename with "0000000" doesn't seem to work
+    - Nor does putting the plugin in a folder with "000000" or "aaaaa"
 - See if there is a way to pass a launch option to `steam://launch` without having to drop a file somewhere.
+- Game should exit to the Main Menu instead of the Custom Level Ward
