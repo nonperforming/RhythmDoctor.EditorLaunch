@@ -3,8 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>non.rhythmdoctor.editorlaunch</AssemblyName>
+    <TargetName>RhythmDoctor.EditorLaunch</TargetName>
     <Product>RhythmDoctor.EditorLaunch</Product>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
@@ -24,7 +25,7 @@
     </PackageReference>
     <PackageReference Include="UnityEngine.Modules" Version="2022.2.33" IncludeAssets="compile" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
   </ItemGroup>
@@ -38,7 +39,7 @@
     </DiscoverGame>
 
     <Error Condition="'$(GameDir)' == ''" Text="Couldn't find Rhythm Doctor installed " />
-    
+
     <PropertyGroup>
       <GameDir>$(GameDir)\Rhythm Doctor_Data\Managed\</GameDir>
     </PropertyGroup>
