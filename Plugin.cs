@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using RDLevelEditor;
 using UnityEngine;
@@ -14,6 +15,8 @@ internal class Plugin : BaseUnityPlugin
   private static new ManualLogSource Logger;
   private static readonly string EditorLaunchFile = Path.Join(Application.persistentDataPath, "editorlaunch.txt");
 
+  private ConfigEntry<bool> ConfigRelaunchSteam;
+  
   private static string Level;
 
   private void Awake()
@@ -21,9 +24,11 @@ internal class Plugin : BaseUnityPlugin
     Logger = base.Logger;
     Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
+    ConfigRelaunchSteam = Config.Bind("General", "RelaunchInSteam", true, "Relaunch the game with Steam to track playtime");
+    
     RDStartup.Setup();
     if (!LaunchedWithLevel()) return;
-    if (!SteamIntegration.initialized)
+    if (ConfigRelaunchSteam.Value && !SteamIntegration.initialized)
     {
       Logger.LogWarning("Not launched with Steam, relaunching");
       File.WriteAllText(EditorLaunchFile, Level);
