@@ -4,7 +4,7 @@ Launch the [Rhythm Doctor](https://store.steampowered.com/app/774181/Rhythm_Doct
 This is a BepInEx 5 plugin.
 
 > [!NOTE]
-> The game will close and relaunch in order to launch with Steam.
+> The game will close and relaunch in order to launch with Steam if its option is enabled (default) in the configuration file
 
 > [!TIP]
 > You may want to install [BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen) or [enable the console](https://docs.bepinex.dev/articles/user_guide/configuration.html#configuring-bepinex) to check if the game is running
