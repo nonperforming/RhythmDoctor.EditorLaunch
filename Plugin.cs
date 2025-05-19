@@ -1,10 +1,10 @@
-﻿using System;
-using System.IO;
-using BepInEx;
-using BepInEx.Configuration;
-using BepInEx.Logging;
-using RDLevelEditor;
-using UnityEngine;
+﻿global using System;
+global using System.IO;
+global using BepInEx;
+global using BepInEx.Logging;
+global using RDLevelEditor;
+global using HarmonyLib;
+global using UnityEngine;
 
 namespace RhythmDoctor.EditorLaunch;
 
@@ -16,8 +16,8 @@ internal class Plugin : BaseUnityPlugin
   private static readonly string EditorLaunchFile = Path.Join(Application.persistentDataPath, "editorlaunch.txt");
 
   private ConfigEntry<bool> ConfigRelaunchSteam;
-  
-  private static string Level;
+
+  internal static string Level;
 
   private void Awake()
   {
@@ -36,7 +36,7 @@ internal class Plugin : BaseUnityPlugin
       Application.Quit();
     }
 
-    scnCLS.customLevelPath = Level;
+    Harmony.CreateAndPatchAll(typeof(Patch), MyPluginInfo.PLUGIN_GUID);
     scnBase.GoToScene(nameof(scnEditor));
   }
 
@@ -57,10 +57,10 @@ internal class Plugin : BaseUnityPlugin
     {
       Logger.LogDebug("Extension check failed");
     }
-    
+
     return false;
   }
-  
+
   private static bool LaunchedWithLevel()
   {
     if (File.Exists(EditorLaunchFile))
@@ -68,7 +68,7 @@ internal class Plugin : BaseUnityPlugin
       string path = File.ReadAllText(EditorLaunchFile);
       File.Delete(EditorLaunchFile);
       Logger.LogInfo($"Editor launch file found: {path}");
-      
+
       if (IsValidLevel(path))
       {
         Level = path;
@@ -91,7 +91,7 @@ internal class Plugin : BaseUnityPlugin
     foreach (string argument in args)
     {
       if (!IsValidLevel(argument)) continue;
-      
+
       Level = argument;
       return true;
     }

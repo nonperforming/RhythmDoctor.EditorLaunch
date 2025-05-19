@@ -5,7 +5,7 @@
     <AssemblyName>non.rhythmdoctor.editorlaunch</AssemblyName>
     <TargetName>RhythmDoctor.EditorLaunch</TargetName>
     <Product>RhythmDoctor.EditorLaunch</Product>
-    <Version>1.2.1</Version>
+    <Version>1.4.0</Version>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.5.0-beta.1" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
     <PackageReference Include="Nitrox.Discovery.MSBuild" Version="0.1.0">
@@ -45,7 +46,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Reference Include="Assembly-CSharp">
+      <Reference Include="Assembly-CSharp" Publicize="true">
         <HintPath>$(GameDir)\Assembly-CSharp.dll</HintPath>
       </Reference>
     </ItemGroup>
