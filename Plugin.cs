@@ -1,10 +1,12 @@
-﻿global using System;
-global using System.IO;
-global using BepInEx;
-global using BepInEx.Logging;
+﻿global using System.IO;
 global using RDLevelEditor;
 global using HarmonyLib;
 global using UnityEngine;
+
+using System;
+using BepInEx;
+using BepInEx.Configuration;
+using BepInEx.Logging;
 
 namespace RhythmDoctor.EditorLaunch;
 
@@ -25,7 +27,7 @@ internal class Plugin : BaseUnityPlugin
     Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
     ConfigRelaunchSteam = Config.Bind("General", "RelaunchInSteam", true, "Relaunch the game with Steam to track playtime");
-    
+
     RDStartup.Setup();
     if (!LaunchedWithLevel()) return;
     if (ConfigRelaunchSteam.Value && !SteamIntegration.initialized)
