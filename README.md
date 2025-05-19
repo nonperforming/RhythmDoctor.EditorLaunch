@@ -12,7 +12,8 @@ This is a BepInEx 5 plugin.
 ## TODO
 - Improve startup times
   - Find if there is a way to influence load priority
-  - Prefixing the filename with "0000000" doesn't seem to work
+    - Prefixing the filename of the plugin dll with "0000000" doesn't seem to work
     - Nor does putting the plugin in a folder with "000000" or "aaaaa"
 - See if there is a way to pass a launch option to `steam://launch` without having to drop a file somewhere.
-- Game should exit to the Main Menu instead of the Custom Level Ward
+  - steam -applaunch 774181 <params>
+    - Requires access to steam executable
