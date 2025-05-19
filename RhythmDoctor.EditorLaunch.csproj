@@ -39,7 +39,7 @@
       <Output TaskParameter="GamePath" PropertyName="GameDir" />
     </DiscoverGame>
 
-    <Error Condition="'$(GameDir)' == ''" Text="Couldn't find Rhythm Doctor installed " />
+    <Error Condition="'$(GameDir)' == ''" Text="Couldn't find Rhythm Doctor" />
 
     <PropertyGroup>
       <GameDir>$(GameDir)\Rhythm Doctor_Data\Managed\</GameDir>
