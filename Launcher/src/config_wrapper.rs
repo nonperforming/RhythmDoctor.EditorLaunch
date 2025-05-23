@@ -75,9 +75,3 @@ pub fn open_config_file() -> Result<(), String> {
     }
     Err("Failed to open settings file".to_owned())
 }
-
-pub fn write_path_file() -> Option<String> {
-    todo!(
-        "Implement path file to write to when finding Steam fails (use steam://run/APPID instead)"
-    );
-}

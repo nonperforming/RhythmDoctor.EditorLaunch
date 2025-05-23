@@ -7,8 +7,6 @@ use std::process::Command;
 use steamlocate::SteamDir;
 use which::which;
 
-use crate::config_wrapper::write_path_file;
-
 /// Rhythm Doctor's App ID.
 #[allow(clippy::unreadable_literal)]
 const APP_ID: u32 = 774181;
@@ -71,6 +69,13 @@ pub fn launch_rhythm_doctor(path: &str, with_steam: bool) -> Result<(), String> 
     }
 
     Err("Couldn't open Rhythm Doctor".to_owned())
+}
+
+/// Write to the file the RhythmDoctor.EditorLaunch plugin will look for to load rdlevel/rdzip.
+pub fn write_path_file() -> Option<String> {
+    todo!(
+        "Implement path file to write to when finding Steam fails (use steam://run/APPID instead)"
+    );
 }
 
 /// Attempt to find the Steam executable.
