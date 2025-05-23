@@ -26,32 +26,11 @@ pub fn launch_rhythm_doctor(path: &str, with_steam: bool) -> Result<(), String> 
     if with_steam {
         // Launch by passing parameter directly to Steam
         if let Some(steam_path) = find_steam_executable() {
-            if cfg!(target_os = "windows") {
-                // No additional action required
-                Command::new(steam_path)
-                    .args(["-applaunch", APP_ID_STR, path])
-                    .status()
-                    .expect("Failed to launch Rhythm Doctor");
-                return Ok(());
-            } else if cfg!(target_os = "macos") {
-                Command::new(steam_path)
-                    .args(["-applaunch", APP_ID_STR, path])
-                    .status()
-                    .expect("Failed to launch Rhythm Doctor");
-                return Ok(());
-            } else if cfg!(target_os = "linux") {
-                // Requires run_bepinex.sh script
-                Command::new(steam_path)
-                    .args([
-                        "-applaunch",
-                        APP_ID_STR,
-                        "./run_bepinex.sh %command%",
-                        path,
-                    ])
-                    .status()
-                    .expect("Failed to launch Rhythm Doctor");
-                return Ok(());
-            }
+            Command::new(steam_path)
+                .args(["-applaunch", APP_ID_STR, path])
+                .status()
+                .expect("Failed to launch Rhythm Doctor");
+            return Ok(());
         }
 
         // Could't find Steam, fallback to using file + steam://
