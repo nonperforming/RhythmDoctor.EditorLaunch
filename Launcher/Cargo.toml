@@ -1,0 +1,54 @@
+[package]
+name = "rhythm_doctor_editor_launcher"
+version = "0.3.0"
+edition = "2024"
+description = "Helper app for the RhythmDoctor.EditorLaunch plugin"
+readme = "../README.md"
+homepage = "https://github.com/nonperforming/RhythmDoctor.EditorLaunch/"
+repository = "https://github.com/nonperforming/RhythmDoctor.EditorLaunch/"
+license = "MIT"
+publish = false
+
+[dependencies]
+config = { version = "0.15.11", default-features = false, features = ["toml"] }
+log = "0.4.27"
+opener = "0.8.1"
+simplelog = "0.12.2"
+steamlocate = "2.0.1"
+which = "7.0.3"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+tao = "0.33.0"
+
+[build-dependencies]
+built = { version = "0.8.0", features = ["chrono", "git2"] }
+
+[profile.release]
+codegen-units = 1
+panic = "abort"
+lto = true
+opt-level = "z" # Optimize for size
+strip = true
+
+[package.metadata.packager]
+before-packaging-command = "cargo build --release"
+identifier = "io.github.nonperforming.rdlauncher"
+product-name = "Rhythm Doctor Editor Launcher"
+description = "Launch Rhythm Doctor Editor"
+long-description = "Launch Rhythm Doctor Editor from .rdlevel/.rdzip files"
+homepage = "https://github.com/nonperforming/RhythmDoctor.EditorLaunch/"
+authors = ["nonperforming"]
+copyright = "MIT"
+category = "MusicGame"
+
+[[package.metadata.packager.file-associations]]
+extensions = ["rdlevel"]
+mime-type = "application/json"
+name = "Rhythm Doctor Custom Level"
+description = "Rhythm Doctor Custom Level"
+
+[[package.metadata.packager.file-associations]]
+extensions = ["rdzip", "zip"]
+mime-type = "application/zip"
+name = "Rhythm Doctor Custom Level Package"
+description = "Rhythm Doctor Custom Level Package"
