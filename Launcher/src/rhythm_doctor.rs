@@ -1,3 +1,5 @@
+//! Find and launch Rhythm Doctor with arguments and Steam.
+
 use log::{error, info, trace, warn};
 use opener::open;
 use std::path::{Path, PathBuf};
@@ -8,11 +10,15 @@ use which::which;
 use crate::config_wrapper::write_path_file;
 
 /// Rhythm Doctor's App ID.
+#[allow(clippy::unreadable_literal)]
 const APP_ID: u32 = 774181;
 
-/// Launch Rhythm Doctor with BepInEx.
+const APP_ID_STR: &str = "774181";
+
+#[allow(clippy::doc_markdown)]
+/// Launch Rhythm Doctor with [BepInEx](https://docs.bepinex.dev/index.html).
 /// Note that launching BepInEx is different on Windows, Linux, and macOS.
-pub fn launch_rhythm_doctor(path: String, with_steam: bool) -> Result<(), String> {
+pub fn launch_rhythm_doctor(path: &str, with_steam: bool) -> Result<(), String> {
     trace!("Launching Rhythm Doctor");
 
     info!("Launching Rhythm Doctor with BepInEx and path argument");
@@ -23,13 +29,13 @@ pub fn launch_rhythm_doctor(path: String, with_steam: bool) -> Result<(), String
             if cfg!(target_os = "windows") {
                 // No additional action required
                 Command::new(steam_path)
-                    .args(["-applaunch", APP_ID.to_string().as_str(), &path])
+                    .args(["-applaunch", APP_ID_STR, path])
                     .status()
                     .expect("Failed to launch Rhythm Doctor");
                 return Ok(());
             } else if cfg!(target_os = "macos") {
                 Command::new(steam_path)
-                    .args(["-applaunch", APP_ID.to_string().as_str(), &path])
+                    .args(["-applaunch", APP_ID_STR, path])
                     .status()
                     .expect("Failed to launch Rhythm Doctor");
                 return Ok(());
@@ -38,9 +44,9 @@ pub fn launch_rhythm_doctor(path: String, with_steam: bool) -> Result<(), String
                 Command::new(steam_path)
                     .args([
                         "-applaunch",
-                        APP_ID.to_string().as_str(),
+                        APP_ID_STR,
                         "./run_bepinex.sh %command%",
-                        &path,
+                        path,
                     ])
                     .status()
                     .expect("Failed to launch Rhythm Doctor");
@@ -54,7 +60,7 @@ pub fn launch_rhythm_doctor(path: String, with_steam: bool) -> Result<(), String
             Some(error) => {
                 error!("Failed to write path file - {error}");
             }
-            None => match open("steam://run/".to_owned() + &APP_ID.to_string()) {
+            None => match open("steam://run/".to_owned() + APP_ID_STR) {
                 Ok(()) => {
                     return Ok(());
                 }
@@ -67,22 +73,25 @@ pub fn launch_rhythm_doctor(path: String, with_steam: bool) -> Result<(), String
 
     // Couldn't open Steam, fallback to using Rhythm Doctor (slow!)
     warn!("Opening Rhythm Doctor directly");
-    if let Some(mut path) = find_rhythm_doctor() {
+    if let Some(mut game_path) = find_rhythm_doctor() {
         if cfg!(target_os = "windows") {
-            path = path.join("Rhythm Doctor.exe");
+            game_path = game_path.join("Rhythm Doctor.exe");
         } else if cfg!(target_os = "macos") {
-            path = path.join("Rhythm Doctor.app");
+            game_path = game_path.join("Rhythm Doctor.app");
         } else if cfg!(target_os = "linux") {
-            path = path.join("Rhythm Doctor");
+            game_path = game_path.join("Rhythm Doctor");
         } else {
-            panic!("Unsupported OS");
+            return Err("Unsupported OS".to_owned());
         }
 
-        open(path).expect("Failed to open Rhythm Doctor");
+        Command::new(game_path)
+            .arg(path)
+            .status()
+            .expect("Failed to launch Rhythm Doctor");
         return Ok(());
     }
 
-    return Err("Couldn't open Rhythm Doctor".to_string());
+    Err("Couldn't open Rhythm Doctor".to_owned())
 }
 
 /// Attempt to find the Steam executable.
@@ -94,7 +103,7 @@ fn find_steam_executable() -> Option<PathBuf> {
         Err(error) => {
             warn!("Couldn't find Steam on path - {error}");
         }
-    };
+    }
 
     // Try to find Steam based on default install locations
     trace!("Trying to find Steam based on default install locations");
@@ -133,23 +142,20 @@ fn find_rhythm_doctor() -> Option<PathBuf> {
     trace!("Trying to find Rhythm Doctor install path");
     if let Ok(steam) = SteamDir::locate() {
         if let Ok(rhythm_doctor) = steam.find_app(APP_ID) {
-            match rhythm_doctor {
-                Some((app, library)) => {
-                    let path = library.resolve_app_dir(&app);
-                    info!("Found Rhythm Doctor at {}", path.display());
-                    return Some(path);
-                }
-                None => {
-                    error!("Couldn't find Rhythm Doctor (case 2)");
-                    return None;
-                }
+            if let Some((app, library)) = rhythm_doctor {
+                let path = library.resolve_app_dir(&app);
+                info!("Found Rhythm Doctor at {}", path.display());
+                Some(path)
+            } else {
+                error!("Couldn't find Rhythm Doctor (case 2)");
+                None
             }
         } else {
             error!("Couldn't find Rhythm Doctor (case 1)");
-            return None;
+            None
         }
     } else {
         error!("Couldn't find Steam");
-        return None;
+        None
     }
 }

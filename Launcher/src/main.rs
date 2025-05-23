@@ -1,49 +1,26 @@
 #![windows_subsystem = "windows"]
 
-mod built;
-mod config_wrapper;
-mod rhythm_doctor;
-
 use built::{BUILT_TIME_UTC, GIT_VERSION, PKG_VERSION, PROFILE, RUSTC_VERSION, TARGET};
-use config_wrapper::*;
-use rhythm_doctor::*;
+use config_wrapper::{
+    build_config, get_config_path, get_log_path, open_config_file, write_config_file,
+};
+#[cfg(target_os = "macos")]
+use macos::event_loop;
+use rhythm_doctor::launch_rhythm_doctor;
 
 use log::{debug, error, info, warn};
 use std::collections::HashMap;
 use std::env::{args, current_exe};
 use std::process::ExitCode;
 
+mod built;
+mod config_wrapper;
+mod macos;
+mod rhythm_doctor;
+
 /// Forward the given launch option to Rhythm Doctor.
 fn main() -> ExitCode {
-    if cfg!(debug_assertions) {
-        let _ = simplelog::CombinedLogger::init(vec![
-            simplelog::TermLogger::new(
-                simplelog::LevelFilter::Trace,
-                simplelog::Config::default(),
-                simplelog::TerminalMode::Stdout,
-                simplelog::ColorChoice::Auto,
-            ),
-            simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Trace,
-                simplelog::Config::default(),
-                std::fs::File::create(get_log_path()).unwrap(),
-            ),
-        ]);
-    } else {
-        let _ = simplelog::CombinedLogger::init(vec![
-            simplelog::TermLogger::new(
-                simplelog::LevelFilter::Info,
-                simplelog::Config::default(),
-                simplelog::TerminalMode::Stdout,
-                simplelog::ColorChoice::Auto,
-            ),
-            simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Info,
-                simplelog::Config::default(),
-                std::fs::File::create(get_log_path()).unwrap(),
-            ),
-        ]);
-    }
+    init_log();
 
     info!(
         "Started - {} v{} ({}) compiled with {} on {} for {}",
@@ -80,68 +57,60 @@ fn main() -> ExitCode {
     let args: Vec<String> = args().collect();
     let with_steam = settings.get("steam").is_some_and(|steam| steam == "true");
 
-    let level = match args.get(1) {
-        Some(level) => level,
-        None => {
-            info!("Run with no arguments");
-            if cfg!(target_os = "macos") {
-                // Handle .rdlevel/.rdzip/.zip files opened in macOS
-                debug!("Creating event loop to listen for file");
-
-                use tao::event::Event;
-                use tao::event_loop::ControlFlow;
-                use tao::event_loop::EventLoop;
-
-                let event_loop = EventLoop::new();
-                let mut empty_polls = 0;
-
-                event_loop.run(move |event, _, control_flow| {
-                    *control_flow = ControlFlow::Wait;
-
-                    match event {
-                        Event::Opened { urls } => {
-                            info!("Opened event");
-                            if let Some(level) = urls.get(0) {
-                                open_rhythm_doctor_with_level(
-                                    with_steam,
-                                    level.to_file_path().unwrap().display().to_string(),
-                                );
-                                *control_flow = ControlFlow::ExitWithCode(0);
-                            } else {
-                                warn!("No URL found in opened event")
-                            }
-                        }
-                        _ => {
-                            empty_polls += 1;
-                            // == 50 as we do not want to open the config file multiple times
-                            if empty_polls == 50 {
-                                warn!(
-                                    "No events for 50 polls, opening configuration file and closing"
-                                );
-                                let _ = open_config_file().unwrap();
-                                *control_flow = ControlFlow::ExitWithCode(1);
-                            }
-                        }
-                    }
-                });
-            } else {
-                info!("Opening configuration file");
-                let _ = open_config_file();
-                return ExitCode::from(1);
-            }
+    let Some(level) = args.get(1) else {
+        info!("Run with no arguments");
+        if cfg!(target_os = "macos") {
+            event_loop(with_steam);
+        } else {
+            info!("Opening configuration file");
+            let _ = open_config_file();
+            return ExitCode::from(1);
         }
     };
 
-    open_rhythm_doctor_with_level(with_steam, level.to_string());
+    open_rhythm_doctor_with_level(with_steam, level);
     ExitCode::from(0)
 }
 
-fn open_rhythm_doctor_with_level(with_steam: bool, level: String) -> ExitCode {
-    info!("Opening Rhythm Doctor with level {}", level);
+/// Sets up logging
+fn init_log() {
+    if cfg!(debug_assertions) {
+        let _ = simplelog::CombinedLogger::init(vec![
+            simplelog::TermLogger::new(
+                simplelog::LevelFilter::Trace,
+                simplelog::Config::default(),
+                simplelog::TerminalMode::Stdout,
+                simplelog::ColorChoice::Auto,
+            ),
+            simplelog::WriteLogger::new(
+                simplelog::LevelFilter::Trace,
+                simplelog::Config::default(),
+                std::fs::File::create(get_log_path()).unwrap(),
+            ),
+        ]);
+    } else {
+        let _ = simplelog::CombinedLogger::init(vec![
+            simplelog::TermLogger::new(
+                simplelog::LevelFilter::Info,
+                simplelog::Config::default(),
+                simplelog::TerminalMode::Stdout,
+                simplelog::ColorChoice::Auto,
+            ),
+            simplelog::WriteLogger::new(
+                simplelog::LevelFilter::Info,
+                simplelog::Config::default(),
+                std::fs::File::create(get_log_path()).unwrap(),
+            ),
+        ]);
+    }
+}
+
+fn open_rhythm_doctor_with_level(with_steam: bool, level: &str) -> ExitCode {
+    info!("Opening Rhythm Doctor with level {level}");
     if let Err(error) = launch_rhythm_doctor(level, with_steam) {
         error!("Failed to launch Rhythm Doctor: {error}");
         return ExitCode::from(2);
     }
 
-    return ExitCode::from(0);
+    ExitCode::from(0)
 }

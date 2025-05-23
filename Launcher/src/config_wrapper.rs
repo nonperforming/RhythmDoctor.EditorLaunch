@@ -52,7 +52,7 @@ pub fn write_config_file() -> Result<Config, String> {
         Ok(mut file) => {
             let write = file.write_all(b"# Open Rhythm Doctor with Steam.\nsteam = true");
             match write {
-                Ok(_) => {
+                Ok(()) => {
                     info!("Created new settings file");
                     match build_config() {
                         Ok(config) => {
@@ -70,10 +70,10 @@ pub fn write_config_file() -> Result<Config, String> {
 }
 
 pub fn open_config_file() -> Result<(), String> {
-    if let Ok(_) = open(get_config_path()) {
+    if open(get_config_path()).is_ok() {
         return Ok(());
     }
-    return Err("Failed to open settings file".to_string());
+    Err("Failed to open settings file".to_owned())
 }
 
 pub fn write_path_file() -> Option<String> {
