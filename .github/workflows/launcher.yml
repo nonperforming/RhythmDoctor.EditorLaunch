@@ -3,16 +3,13 @@ name: Build Launcher
 on:
   push:
     paths:
-      - Launcher/*
+      - Launcher/**
       - .github/workflows/launcher.yml
   pull_request:
     paths:
       - Launcher/*
       - .github/workflows/launcher.yml
   workflow_call:
-
-env:
-  CARGO_TERM_COLOR: always
 
 jobs:
   build_launcher:
@@ -35,7 +32,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
-      - name: Setup rust
+      - name: Setup Rust
         uses: dtolnay/rust-toolchain@b3b07ba8b418998c39fb20f53e8b695cdcc8de1b
         with:
           toolchain: ${{ matrix.toolchain }}
@@ -45,5 +42,8 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: ${{ matrix.os }}-${{ matrix.toolchain }}
-          path: ^target/debug/rhythm_doctor_launcher(?:\.exe)?$
+          path: |
+            ${{ github.workspace }}/Launcher/target/debug/rhythm_doctor_editor_launcher
+            ${{ github.workspace }}/Launcher/target/debug/rhythm_doctor_editor_launcher.exe
+            ${{ github.workspace }}/Launcher/target/debug/rhythm_doctor_editor_launcher.pdb
           if-no-files-found: error
