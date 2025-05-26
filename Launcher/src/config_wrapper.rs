@@ -20,9 +20,11 @@ pub fn get_config_path() -> PathBuf {
 fn get_parent_folder() -> PathBuf {
     let current_exe = current_exe().unwrap();
 
-    if cfg!(target_os = "windows") || cfg!(target_os = "linux") {
-        return current_exe.parent().unwrap().to_path_buf();
-    } else if cfg!(target_os = "macos") {
+    #[cfg(not(target_os = "macos"))]
+    return current_exe.parent().unwrap().to_path_buf();
+
+    #[cfg(target_os = "macos")]
+    {
         // MacOS has "application" *folders* (folders with the extension .app),
         // so we need to navigate up this.
         return current_exe // rhythm_doctor_editor_launcher
@@ -36,7 +38,6 @@ fn get_parent_folder() -> PathBuf {
             .unwrap()
             .to_path_buf();
     }
-    panic!("Unsupported OS");
 }
 
 pub fn build_config() -> Result<Config, ConfigError> {

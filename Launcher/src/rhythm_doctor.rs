@@ -51,14 +51,19 @@ pub fn launch_rhythm_doctor(path: &str, with_steam: bool) -> Result<(), String> 
     // Couldn't open Steam, fallback to using Rhythm Doctor (slow!)
     warn!("Opening Rhythm Doctor directly");
     if let Some(mut game_path) = find_rhythm_doctor() {
-        if cfg!(target_os = "windows") {
+        #[cfg(target_os = "windows")]
+        {
             game_path = game_path.join("Rhythm Doctor.exe");
-        } else if cfg!(target_os = "macos") {
+        }
+
+        #[cfg(target_os = "macos")]
+        {
             game_path = game_path.join("Rhythm Doctor.app");
-        } else if cfg!(target_os = "linux") {
+        }
+
+        #[cfg(target_os = "linux")]
+        {
             game_path = game_path.join("Rhythm Doctor");
-        } else {
-            return Err("Unsupported OS".to_owned());
         }
 
         Command::new(game_path)
@@ -91,13 +96,18 @@ fn find_steam_executable() -> Option<PathBuf> {
 
     // Try to find Steam based on default install locations
     trace!("Trying to find Steam based on default install locations");
-    if cfg!(target_os = "windows") {
+
+    #[cfg(target_os = "windows")]
+    {
         trace!(r"Checking for Steam executable at C:\Program Files (x86)\Steam\steam.exe");
         if Path::new(r"C:\Program Files (x86)\Steam\steam.exe").exists() {
             info!(r"Found Steam executable at C:\Program Files (x86)\Steam\steam.exe");
             return Some(PathBuf::from(r"C:\Program Files (x86)\Steam\steam.exe"));
         }
-    } else if cfg!(target_os = "macos") {
+    }
+
+    #[cfg(target_os = "macos")]
+    {
         trace!("Checking for Steam executable at /Applications/Steam.app/Contents/MacOS/steam_osx");
         if Path::new("/Applications/Steam.app/Contents/MacOS/steam_osx").exists() {
             info!("Found Steam executable at /Applications/Steam.app/Contents/MacOS/steam_osx");
@@ -105,7 +115,10 @@ fn find_steam_executable() -> Option<PathBuf> {
                 "/Applications/Steam.app/Contents/MacOS/steam_osx",
             ));
         }
-    } else if cfg!(target_os = "linux") {
+    }
+
+    #[cfg(target_os = "linux")]
+    {
         // TODO: Add flatpak, native, etc
         //       We should have better luck searching on PATH anyways.
         // Official .deb package from https://cdn.cloudflare.steamstatic.com/client/installer/steam.deb

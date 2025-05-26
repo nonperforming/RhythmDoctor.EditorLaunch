@@ -2,10 +2,8 @@
 
 use built::{BUILT_TIME_UTC, GIT_VERSION, PKG_VERSION, PROFILE, RUSTC_VERSION, TARGET};
 use config_wrapper::{
-    build_config, get_config_path, get_log_path, open_config_file, write_config_file,
+    build_config, get_config_path, get_log_path, write_config_file,
 };
-#[cfg(target_os = "macos")]
-use macos::event_loop;
 use rhythm_doctor::launch_rhythm_doctor;
 
 use log::{debug, error, info, warn};
@@ -15,8 +13,18 @@ use std::process::ExitCode;
 
 mod built;
 mod config_wrapper;
-mod macos;
 mod rhythm_doctor;
+
+// MacOS
+#[cfg(target_os = "macos")]
+use macos::event_loop;
+
+#[cfg(target_os = "macos")]
+mod macos;
+
+// Not MacOS
+#[cfg(not(target_os = "macos"))]
+use config_wrapper::open_config_file;
 
 /// Forward the given launch option to Rhythm Doctor.
 fn main() -> ExitCode {
@@ -59,9 +67,12 @@ fn main() -> ExitCode {
 
     let Some(level) = args.get(1) else {
         info!("Run with no arguments");
-        if cfg!(target_os = "macos") {
-            event_loop(with_steam);
-        } else {
+
+        #[cfg(target_os = "macos")]
+        event_loop(with_steam);
+
+        #[cfg(not(target_os = "macos"))]
+        {
             info!("Opening configuration file");
             let _ = open_config_file();
             return ExitCode::from(1);
@@ -74,35 +85,35 @@ fn main() -> ExitCode {
 
 /// Sets up logging
 fn init_log() {
-    if cfg!(debug_assertions) {
-        let _ = simplelog::CombinedLogger::init(vec![
-            simplelog::TermLogger::new(
-                simplelog::LevelFilter::Trace,
-                simplelog::Config::default(),
-                simplelog::TerminalMode::Stdout,
-                simplelog::ColorChoice::Auto,
-            ),
-            simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Trace,
-                simplelog::Config::default(),
-                std::fs::File::create(get_log_path()).unwrap(),
-            ),
-        ]);
-    } else {
-        let _ = simplelog::CombinedLogger::init(vec![
-            simplelog::TermLogger::new(
-                simplelog::LevelFilter::Info,
-                simplelog::Config::default(),
-                simplelog::TerminalMode::Stdout,
-                simplelog::ColorChoice::Auto,
-            ),
-            simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Info,
-                simplelog::Config::default(),
-                std::fs::File::create(get_log_path()).unwrap(),
-            ),
-        ]);
-    }
+    #[cfg(debug_assertions)]
+    let _ = simplelog::CombinedLogger::init(vec![
+        simplelog::TermLogger::new(
+            simplelog::LevelFilter::Trace,
+            simplelog::Config::default(),
+            simplelog::TerminalMode::Stdout,
+            simplelog::ColorChoice::Auto,
+        ),
+        simplelog::WriteLogger::new(
+            simplelog::LevelFilter::Trace,
+            simplelog::Config::default(),
+            std::fs::File::create(get_log_path()).unwrap(),
+        ),
+    ]);
+
+    #[cfg(not(debug_assertions))]
+    let _ = simplelog::CombinedLogger::init(vec![
+        simplelog::TermLogger::new(
+            simplelog::LevelFilter::Info,
+            simplelog::Config::default(),
+            simplelog::TerminalMode::Stdout,
+            simplelog::ColorChoice::Auto,
+        ),
+        simplelog::WriteLogger::new(
+            simplelog::LevelFilter::Info,
+            simplelog::Config::default(),
+            std::fs::File::create(get_log_path()).unwrap(),
+        ),
+    ]);
 }
 
 fn open_rhythm_doctor_with_level(with_steam: bool, level: &str) -> ExitCode {
