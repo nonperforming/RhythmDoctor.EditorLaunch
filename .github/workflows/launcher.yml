@@ -3,11 +3,11 @@ name: Build Launcher
 on:
   push:
     paths:
-      - Launcher
+      - Launcher/*
       - .github/workflows/launcher.yml
   pull_request:
     paths:
-      - Launcher
+      - Launcher/*
       - .github/workflows/launcher.yml
   workflow_call:
 
