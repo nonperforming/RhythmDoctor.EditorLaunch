@@ -1,0 +1,47 @@
+name: Build Launcher
+
+on:
+  push:
+    paths:
+      - Launcher
+      - .github/workflows/launcher.yml
+  pull_request:
+    paths:
+      - Launcher
+      - .github/workflows/launcher.yml
+  workflow_call:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_launcher:
+    name: Build Launcher
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./Launcher
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - nightly
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+          - windows-11-arm
+          - ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup Rust
+        run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - name: Build
+        run: cargo build --verbose
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ${{ matrix.os }}-${{ matrix.toolchain }}
+          path: ^target/debug/rhythm_doctor_launcher(?:\.exe)?$
+          if-no-files-found: error
