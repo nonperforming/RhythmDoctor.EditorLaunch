@@ -27,7 +27,7 @@ fn get_parent_folder() -> PathBuf {
     {
         // MacOS has "application" *folders* (folders with the extension .app),
         // so we need to navigate up this.
-        return current_exe // rhythm_doctor_editor_launcher
+        current_exe // rhythm_doctor_editor_launcher
             .parent() // MacOS
             .unwrap()
             .parent() // Contents
@@ -36,7 +36,7 @@ fn get_parent_folder() -> PathBuf {
             .unwrap()
             .parent()
             .unwrap()
-            .to_path_buf();
+            .to_path_buf()
     }
 }
 

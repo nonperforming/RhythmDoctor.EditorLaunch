@@ -1,7 +1,5 @@
 //! Handle .rdlevel/.rdzip/.zip files opened in macOS using an event loop
 
-#![cfg(target_os = "macos")]
-
 use log::{debug, info, warn};
 use tao::event::Event;
 use tao::event_loop::ControlFlow;

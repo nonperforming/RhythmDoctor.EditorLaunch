@@ -50,21 +50,17 @@ pub fn launch_rhythm_doctor(path: &str, with_steam: bool) -> Result<(), String> 
 
     // Couldn't open Steam, fallback to using Rhythm Doctor (slow!)
     warn!("Opening Rhythm Doctor directly");
-    if let Some(mut game_path) = find_rhythm_doctor() {
-        #[cfg(target_os = "windows")]
-        {
-            game_path = game_path.join("Rhythm Doctor.exe");
-        }
+    if let Some(game_path) = find_rhythm_doctor() {
+        let game_path: PathBuf = {
+            #[cfg(target_os = "windows")]
+            { game_path.join("Rhythm Doctor.exe") }
 
-        #[cfg(target_os = "macos")]
-        {
-            game_path = game_path.join("Rhythm Doctor.app");
-        }
+            #[cfg(target_os = "macos")]
+            { game_path.join("Rhythm Doctor.app") }
 
-        #[cfg(target_os = "linux")]
-        {
-            game_path = game_path.join("Rhythm Doctor");
-        }
+            #[cfg(target_os = "linux")]
+            { game_path.join("Rhythm Doctor") }
+        };
 
         Command::new(game_path)
             .arg(path)

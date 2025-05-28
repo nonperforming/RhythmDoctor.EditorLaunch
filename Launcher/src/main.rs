@@ -1,9 +1,11 @@
 #![windows_subsystem = "windows"]
 
+mod built;
+mod config_wrapper;
+mod rhythm_doctor;
+
 use built::{BUILT_TIME_UTC, GIT_VERSION, PKG_VERSION, PROFILE, RUSTC_VERSION, TARGET};
-use config_wrapper::{
-    build_config, get_config_path, get_log_path, write_config_file,
-};
+use config_wrapper::{build_config, get_config_path, get_log_path, write_config_file};
 use rhythm_doctor::launch_rhythm_doctor;
 
 use log::{debug, error, info, warn};
@@ -11,16 +13,12 @@ use std::collections::HashMap;
 use std::env::{args, current_exe};
 use std::process::ExitCode;
 
-mod built;
-mod config_wrapper;
-mod rhythm_doctor;
-
 // MacOS
 #[cfg(target_os = "macos")]
-use macos::event_loop;
+mod macos;
 
 #[cfg(target_os = "macos")]
-mod macos;
+use macos::event_loop;
 
 // Not MacOS
 #[cfg(not(target_os = "macos"))]
