@@ -36,8 +36,12 @@ jobs:
         uses: dtolnay/rust-toolchain@b3b07ba8b418998c39fb20f53e8b695cdcc8de1b
         with:
           toolchain: ${{ matrix.toolchain }}
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6
+        with:
+          key: ${{ steps.toolchain.outputs.cachekey }}
       - name: Build
-        run: cargo build --verbose
+        run: cargo +${{ steps.toolchain.outputs.name }} build --verbose
       - name: Upload artifact
         uses: actions/upload-artifact@v4.6.2
         with:
