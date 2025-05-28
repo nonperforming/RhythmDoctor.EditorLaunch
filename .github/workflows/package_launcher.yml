@@ -1,6 +1,12 @@
 name: Package Launcher
 
 on:
+  push:
+    paths:
+      - .github/workflows/package_launcher.yml
+  pull_request:
+    paths:
+      - .github/workflows/package_launcher.yml
   workflow_dispatch:
 
 jobs:
@@ -35,6 +41,7 @@ jobs:
         with:
           key: ${{ steps.rust.outputs.cachekey }}
           workspaces: "./Launcher -> target"
+          env-vars: ""
       - name: Install cargo-packager
         run: cargo +${{ steps.rust.outputs.name }} install cargo-packager --locked --verbose
       - name: Build & Package
