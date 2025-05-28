@@ -43,6 +43,7 @@ jobs:
         with:
           key: ${{ steps.rust.outputs.cachekey }}
           workspaces: "./Launcher -> target"
+          env-vars: ""
       - name: Build
         run: cargo +${{ steps.rust.outputs.name }} build --verbose
       - name: Upload artifact
