@@ -19,6 +19,7 @@ jobs:
       run:
         working-directory: ./Launcher
     strategy:
+      fail-fast: false
       matrix:
         toolchain:
           - stable
@@ -40,6 +41,7 @@ jobs:
         uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6
         with:
           key: ${{ steps.toolchain.outputs.cachekey }}
+          workspaces: "./Launcher -> target"
       - name: Build
         run: cargo +${{ steps.toolchain.outputs.name }} build --verbose
       - name: Upload artifact
