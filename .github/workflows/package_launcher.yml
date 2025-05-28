@@ -1,0 +1,47 @@
+name: Package Launcher
+
+on:
+  workflow_call:
+
+jobs:
+  package_launcher:
+    name: Build Launcher
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./Launcher
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - stable
+          - nightly
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+          - windows-11-arm
+          - ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@b3b07ba8b418998c39fb20f53e8b695cdcc8de1b
+        id: rust
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6
+        with:
+          key: ${{ steps.rust.outputs.cachekey }}
+          workspaces: "./Launcher -> target"
+      - name: Install cargo-packager
+        run: cargo +${{ steps.rust.outputs.name }} install cargo-packager --locked --verbose
+      - name: Build & Package
+        run: cargo +${{ steps.rust.outputs.name }} packager --release --out-dir package --verbose
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ${{ matrix.os }}-${{ matrix.toolchain }}
+          path: ${{ github.workspace }}/Launcher/package
+          if-no-files-found: error
