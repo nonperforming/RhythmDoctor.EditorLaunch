@@ -1,11 +1,11 @@
 name: Package Launcher
 
 on:
-  workflow_call:
+  workflow_dispatch:
 
 jobs:
   package_launcher:
-    name: Build Launcher
+    name: Package Launcher
     runs-on: ${{ matrix.os }}
     defaults:
       run:
