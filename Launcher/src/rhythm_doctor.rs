@@ -10,7 +10,7 @@ use which::which;
 /// Rhythm Doctor's App ID.
 #[allow(clippy::unreadable_literal)]
 const APP_ID: u32 = 774181;
-
+/// Rhythm Doctor's App ID.
 const APP_ID_STR: &str = "774181";
 
 #[allow(clippy::doc_markdown)]
