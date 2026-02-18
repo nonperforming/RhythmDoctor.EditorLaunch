@@ -10,7 +10,6 @@ use which::which;
 /// Rhythm Doctor's App ID.
 #[allow(clippy::unreadable_literal)]
 const APP_ID: u32 = 774181;
-/// Rhythm Doctor's App ID.
 const APP_ID_STR: &str = "774181";
 
 #[allow(clippy::doc_markdown)]
@@ -19,16 +18,29 @@ const APP_ID_STR: &str = "774181";
 pub fn launch_rhythm_doctor(path: &str, with_steam: bool) -> Result<(), String> {
     trace!("Launching Rhythm Doctor");
 
-    info!("Launching Rhythm Doctor with BepInEx and path argument");
+    info!("Launching Rhythm Doctor with BepInEx and path {path}");
 
     if with_steam {
+        info!("Attempting to launch with Steam");
+
         // Launch by passing parameter directly to Steam
         if let Some(steam_path) = find_steam_executable() {
-            Command::new(steam_path)
+            match Command::new(steam_path)
                 .args(["-applaunch", APP_ID_STR, path])
                 .status()
-                .expect("Failed to launch Rhythm Doctor");
-            return Ok(());
+            {
+                Err(error) => {
+                    error!("Failed to launch with Steam - {error}");
+                    return Err("Failed to launch with Steam".to_owned());
+                }
+                Ok(status) => {
+                    if !status.success() {
+                        error!("Failed to launch with Steam");
+                        return Err("Failed to launch with Steam".to_owned());
+                    }
+                    return Ok(());
+                }
+            }
         }
 
         // Could't find Steam, fallback to using file + steam://
@@ -49,23 +61,45 @@ pub fn launch_rhythm_doctor(path: &str, with_steam: bool) -> Result<(), String> 
     }
 
     // Couldn't open Steam, fallback to using Rhythm Doctor (slow!)
-    warn!("Opening Rhythm Doctor directly");
+    if with_steam {
+        warn!("Opening Rhythm Doctor directly, couldn't open with Steam");
+    } else {
+        info!("Opening Rhythm Doctor directly");
+    }
     if let Some(game_path) = find_rhythm_doctor() {
-        let game_path: PathBuf = {
+        let executable_path: PathBuf = {
             #[cfg(target_os = "windows")]
-            { game_path.join("Rhythm Doctor.exe") }
+            {
+                game_path.join("Rhythm Doctor.exe")
+            }
 
-            #[cfg(target_os = "macos")]
-            { game_path.join("Rhythm Doctor.app") }
-
-            #[cfg(target_os = "linux")]
-            { game_path.join("Rhythm Doctor") }
+            #[cfg(not(target_os = "windows"))]
+            {
+                game_path.join("run_bepinex.sh")
+            }
         };
 
-        Command::new(game_path)
-            .arg(path)
-            .status()
-            .expect("Failed to launch Rhythm Doctor");
+        #[cfg(target_os = "windows")]
+        let command = Command::new(executable_path).arg(path).status();
+
+        // On macOS and Linux, we need to give the path of the game to run_bepinex.sh
+        // to $1, assuming the user hasn't set executable_name.
+        #[cfg(target_os = "linux")]
+        let command = Command::new(executable_path)
+            .args([game_path.join("Rhythm Doctor").to_str().unwrap(), path]) // TODO: Can this panic?
+            .status();
+
+        // FIXME: Not working? Game launches but not with BepInEx.
+        #[cfg(target_os = "macos")]
+        let command = Command::new(executable_path)
+            .args([game_path.join("Rhythm Doctor.app").to_str().unwrap(), path]) // TODO: Can this panic?
+            .status();
+
+        if let Err(error) = command {
+            error!("Failed to launch Rhythm Doctor - {error}");
+            return Err(format!("Failed to launch Rhythm Doctor - {error}"));
+        }
+
         return Ok(());
     }
 

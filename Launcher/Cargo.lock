@@ -1444,12 +1444,13 @@ checksum = "809e8dc61f6de73b46c85f4c96486310fe304c434cfa43669d7b40f711150908"
 
 [[package]]
 name = "rhythm_doctor_editor_launcher"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "built",
  "config",
  "log",
  "opener",
+ "serde",
  "simplelog",
  "steamlocate",
  "tao",

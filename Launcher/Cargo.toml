@@ -1,6 +1,6 @@
 [package]
 name = "rhythm_doctor_editor_launcher"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2024"
 description = "Helper app for the RhythmDoctor.EditorLaunch plugin"
 readme = "../README.md"
@@ -13,6 +13,7 @@ publish = false
 config = { version = "0.15.11", default-features = false, features = ["toml"] }
 log = "0.4.27"
 opener = "0.8.1"
+serde = { version = "1.0.219", default-features = false }
 simplelog = "0.12.2"
 steamlocate = "2.0.1"
 which = "7.0.3"
